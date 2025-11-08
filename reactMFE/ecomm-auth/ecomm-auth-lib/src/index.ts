@@ -1,0 +1,1 @@
+export { useSharedStore } from "./store";

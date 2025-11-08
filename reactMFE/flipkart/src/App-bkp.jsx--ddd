@@ -1,0 +1,71 @@
+import React from "react";
+import ReactDOM from "react-dom";
+import { Link, Routes, Route, BrowserRouter, Router } from "react-router-dom";
+const BillhostApp = React.lazy(() => import("billhost/App"));
+const ShiphostApp = React.lazy(() => import("shiphost/App"));
+import ErrorBoundary from "./ErrorBoundary";
+
+import "./index.scss";
+
+function ErrorFallback() {
+  return <div>Something went wrong2</div>;
+}
+
+const RemoteWrapper = ({ children }) => (
+  <div
+    style={{
+      border: "1px solid red",
+      background: "white",
+    }}
+  >
+    <ErrorBoundary fallbackComponent={ErrorFallback}>{children}</ErrorBoundary>
+  </div>
+);
+
+const App = () => (
+  <div className="mt-10 text-3xl mx-auto max-w-6xl">
+    <div>Main Flipkart MFE</div>
+    <BillhostApp />
+    {/* <BrowserRouter>
+      <header className="App-header">
+        <nav class="bg-white border-gray-200 dark:bg-gray-900">
+          <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+              <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                <li className="bg-green-300">
+                  <Link to="/"> Home </Link>
+                </li>
+                <li className="bg-green-300">
+                  <Link to="/billmfe"> Billing </Link>
+                </li>
+                <li className="bg-green-300">
+                  <Link to="/shipmfe"> Shiping </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <Routes>
+        <Route
+          path="/billmfe"
+          element={
+            <RemoteWrapper>
+              <BillhostApp />
+            </RemoteWrapper>
+          }
+        />
+        <Route
+          path="/shipmfe"
+          element={
+            <RemoteWrapper>
+              <ShiphostApp />
+            </RemoteWrapper>
+          }
+        />
+        <Route path="/" element={<App />} />
+      </Routes>
+    </BrowserRouter> */}
+  </div>
+);
+ReactDOM.render(<App />, document.getElementById("app"));

@@ -1,0 +1,237 @@
+advance react
+
+pure component react.PureComponent  and latest react.memo
+
+lift the state up in a React application:
+Lifting state up
+const Parent = () => {
+  const [counter, setCounter] = useState(0);
+
+  return (
+    <div>
+      <Child1 counter={counter} />
+      <Child2 setCounter={setCounter} />
+    </div>
+  );
+
+controlled and uncontrolled:
+  function ControlledInput() {
+  const [value, setValue] = React.useState('');
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+    />
+  );
+}
+function UncontrolledInput() {
+  const inputRef = React.useRef();
+  return <input type="text" ref={inputRef} />;
+}
+
+createElement and clone cloneElement
+React.createElement('div', { className: 'container' }, 'Hello World');
+
+const element = <button className="btn">Click Me</button>;
+const clonedElement = React.cloneElement(element, { className: 'btn-primary' });
+
+propTypes:
+import PropTypes from 'prop-types';
+
+function MyComponent({ name, age }) {
+  return (
+    <div>
+      {name} is {age} years old
+    </div>
+  );
+}
+
+MyComponent.propTypes = {
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number.isRequired,
+};
+
+interface destructrering
+interface MyComponentProps {
+  name: string;
+  age: number;
+}
+
+function MyComponent({ name, age }: MyComponentProps) {
+  return <div>{name} is {age} years old</div>;
+}
+
+benfit of hooks:  reducing the reliance on lifecycle, 
+React hooks should be called at the top level of a function,
+
+Runs before DOM paint
+useLayoutEffect: Runs before DOM paint'
+
+  Useeffect: Runs after DOM paint
+  useInsertionEffect: This Hook fires synchronously before any DOM mutations occur and before useLayoutEffect.
+  requestAnimationFrame : requestAnimationFrame ensures your animation 
+
+  15- react hydration: attach everthing incremently
+  16 - React Portals :rendering children into a DOM node outside the parent component's
+  17<React.StrictMode>
+
+  Detects unsafe lifecycles: Warns about deprecated lifecycle methods
+Identifies side effects: Highlights components with side effects in render methods
+Warns about unexpected state changes: Catches unexpected state mutations
+Enforces best practices
+18- code splitting: load on demand  React.lazy and Suspense.
+19flux pattern : store, dispatc, action , reducer
+20one-way data flow: state and prop drilling paremt to child
+21- context ; cause reneder
+22SyntheticEvent : preventDefault (stop form submit)and stopPropgation (stop event bubbling)
+23-lifecycle: componentDidMount, shouldComponentUpdate, componentDidUpdate, componentWillUnmount
+24-resize : useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+25:params:  const { userId } = useParams();
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Outlet,
+  useParams,
+} from 'react-router-dom';
+
+function UserProfile() {
+  const { userId } = useParams();
+  return <h2>User ID: {userId}</h2>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="user/:userId" element={<Outlet />}>
+          <Route path="profile" element={<UserProfile />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+27- history.push('/new-page') history.replace('/new-page')
+const navigate = useNavigate();
+  const goToPage = () => navigate('/new-page');
+28-private router
+import { Navigate } from 'react-router-dom';
+
+function PrivateRoute({ children }) {
+  return isAuthenticated ? children : <Navigate to="/login" />;
+}
+29-useSearchParams 
+import { useSearchParams } from 'react-router-dom';
+
+function MyComponent() {
+  const [searchParams] = useSearchParams();
+  const queryParam = searchParams.get('paramName');
+  return <div>Query Param: {queryParam}</div>;
+}
+30-react internationalization
+npm install react-i18next i18next i18next-browser-languagedetector
+
+const { t, i18n } = useTranslation();
+<p>{t('goodbye_message', { name: name })}</p>
+32-formateMessage :import { FormattedMessage } from 'react-intl';
+
+function WelcomeMessage() {
+  return (
+    <FormattedMessage
+      id="welcome"
+      defaultMessage="Hello, {name}!"
+      values={{ name: 'John' }}
+    />
+  );
+}
+33-useIntel:
+import { useIntl } from 'react-intl';
+
+function LocaleDisplay() {
+  const intl = useIntl();
+  return <div>Current locale: {intl.locale}</div>;
+}
+
+import { useIntl } from 'react-intl';
+
+function LocaleDisplay() {
+  const intl = useIntl();
+  return <div>Current locale: {intl.locale}</div>;
+}
+34:test react
+34:import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
+import MyComponent from './MyComponent';
+
+test('renders the component with the correct text', () => {
+  render(<MyComponent />);
+  expect(screen.getByText('Hello, World!')).toBeInTheDocument();
+});
+
+35- e2e testin : using cypress 
+describe('My Application', () => {
+  it('should allow a user to log in', () => {
+    cy.visit('/login');
+    cy.get('input[name="username"]').type('user');
+    cy.get('input[name="password"]').type('password');
+    cy.get('button[type="submit"]').click();
+    cy.url().should('include', '/dashboard');
+  });
+});
+36-mock-applicationimport { render, screen } from '@testing-library/react';
+
+jest.mock('./api', () => ({
+  fetchData: jest.fn(() => Promise.resolve('mocked data')),
+}));
+
+import MyComponent from './MyComponent';
+
+test('fetches data and renders it', async () => {
+  render(<MyComponent />);
+  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  expect(await screen.findByText('mocked data')).toBeInTheDocument();
+});
+38
+Node: A React Node is any renderable unit in React, like an element, string, number, or null.
+
+Element: An element is a plain object that represents a DOM element or a component. It describes what you want to see on the screen. Elements are immutable and are used to create React components.
+
+Component: A component is a reusable piece of UI that can contain one or more elements. Components can be either functional or class-based. They accept inputs called props and return React elements that describe what should appear on the screen.
+
+Read more about it here
+40: useImperativeHandle :
+useImperativeHandle hook is used to expose the focus method of the inputRef to the parent component when using a ref.
+
+
+const ChildComponent = React.forwardRef((props, ref) => {
+  const inputRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current.focus();
+    },
+  }));
+
+  return <input ref={inputRef} />;
+});
+
+const ParentComponent = () => {
+  const childRef = useRef(null);
+
+  const handleClick = () => {
+    childRef.current.focus();
+  };
+
+  return (
+    <>
+      <ChildComponent ref={childRef} />
+      <button onClick={handleClick}>Focus Input</button>
+    </>
+  );
+};
