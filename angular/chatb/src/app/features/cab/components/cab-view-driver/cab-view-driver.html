@@ -1,0 +1,33 @@
+<div class="driver-details-container">
+  <div class="header">
+    <h2>Viewing Driver Details</h2>
+    <a [routerLink]="['/cab/list']" class="btn btn-back">← Back to List</a>
+  </div>
+
+  <div *ngIf="isLoading()">
+    <p>Loading driver details...</p>
+  </div>
+
+  <div *ngIf="error()" class="error-message">
+    <p>{{ error() }}</p>
+  </div>
+
+  <div *ngIf="!isLoading() && driver()" class="details-card">
+    <h3>{{ driver()!.name }}</h3>
+    
+    <p><strong>ID:</strong> {{ driver()!.id }}</p>
+    <p><strong>Model:</strong> {{ driver()!.cabModel }}</p>
+    <p><strong>License Plate:</strong> {{ driver()!.licensePlate }}</p>
+    
+    <p>
+      <strong>Status:</strong> 
+      <span class="status-badge" [ngClass]="driver()!.status">
+        {{ driver()!.status | titlecase }}
+      </span>
+    </p>
+
+    <div class="action-bar">
+        <a [routerLink]="['/cab/edit', driver()!.id]" class="btn btn-edit">Edit Driver</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="driver-edit-container">
+  <div class="header">
+    <h2>Editing Driver: {{ driver()?.name || 'Loading...' }}</h2>
+    <a [routerLink]="['/cab/list']" class="btn btn-back">← Back to List</a>
+  </div>
+
+  <div *ngIf="isLoading()">
+    <p>Loading driver form...</p>
+  </div>
+  <div *ngIf="error()" class="error-message">
+    <p>{{ error() }}</p>
+  </div>
+
+  <form [formGroup]="driverForm" (ngSubmit)="onSubmit()" class="driver-form" *ngIf="!isLoading() && driver()">
+    
+    <div class="form-group">
+      <label for="id">Driver ID (Read-Only)</label>
+      <input id="id" type="text" formControlName="id" readonly class="readonly-input">
+    </div>
+
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" type="text" formControlName="name">
+      <div *ngIf="driverForm.get('name')?.invalid && driverForm.get('name')?.touched" class="validation-error">
+        Name is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="cabModel">Cab Model</label>
+      <input id="cabModel" type="text" formControlName="cabModel">
+      <div *ngIf="driverForm.get('cabModel')?.invalid && driverForm.get('cabModel')?.touched" class="validation-error">
+        Cab Model is required.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="licensePlate">License Plate</label>
+      <input id="licensePlate" type="text" formControlName="licensePlate">
+      <div *ngIf="driverForm.get('licensePlate')?.invalid && driverForm.get('licensePlate')?.touched" class="validation-error">
+        License Plate is required.
+      </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status">
+            <option *ngFor="let status of statusOptions" [value]="status">
+                {{ status | titlecase }}
+            </option>
+        </select>
+        <div *ngIf="driverForm.get('status')?.invalid && driverForm.get('status')?.touched" class="validation-error">
+            Status is required.
+        </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="isSaving() || driverForm.invalid" class="btn btn-primary">
+        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+      <button type="button" [routerLink]="['/cab/view', driver()!.id]" class="btn btn-secondary">Cancel</button>
+    </div>
+  </form>
+</div>

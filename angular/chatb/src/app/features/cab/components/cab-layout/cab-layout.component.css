@@ -1,0 +1,50 @@
+.cab-feature-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  border: 2px solid #007bff; /* Visual boundary of the feature */
+  padding: 10px;
+}
+
+.feature-header {
+  background-color: #007bff;
+  color: white;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.feature-header h1 {
+  margin: 0 0 10px 0;
+}
+
+.feature-header ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.feature-header a {
+  color: white;
+  text-decoration: none;
+  padding-bottom: 3px;
+}
+
+.feature-header a.active-link {
+  border-bottom: 2px solid yellow;
+}
+
+.feature-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.feature-footer {
+  text-align: center;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  margin-top: 20px;
+  font-size: 0.8em;
+}

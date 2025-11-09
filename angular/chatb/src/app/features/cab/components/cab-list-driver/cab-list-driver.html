@@ -1,0 +1,48 @@
+<p>cab-list-driver works!</p>
+<div class="driver-list-container">
+  <h2>Driver List</h2>
+
+  <div *ngIf="isLoading()" class="loading-message">
+    <p>Loading drivers...</p>
+  </div>
+
+  <div *ngIf="error()" class="error-message">
+    <p>Error: {{ error() }}</p>
+    <button (click)="loadDrivers()">Retry</button>
+  </div>
+
+  <div *ngIf="!isLoading() && drivers().length === 0" class="empty-state">
+    <p>No cab drivers found.</p>
+  </div>
+<app-chatbot></app-chatbot>
+  <table *ngIf="!isLoading() && drivers().length > 0">
+    <thead>
+      <tr>
+        <th>ID  priya</th>
+        <th>Name</th>
+        <th>Cab Model</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+   <tbody>
+    @for (driver of drivers(); track driver.id) { 
+        <tr>
+            <td>{{ driver.id }}99</td>
+            <td>{{ driver.name }}</td>
+            <td>{{ driver.cabModel }}</td>
+            <td [class.status-available]="driver.status === 'available'"
+                [class.status-on-trip]="driver.status === 'on-trip'"
+                [class.status-offline]="driver.status === 'offline'">
+                {{ driver.status | titlecase }}
+            </td>
+            <td>
+                <a [routerLink]="['/cab/view', driver.id]" class="btn btn-view">View</a>
+                
+                <button (click)="goToEdit(driver.id)" class="btn btn-edit">Edit</button>
+            </td>
+        </tr>
+    } 
+</tbody>
+  </table>
+</div>

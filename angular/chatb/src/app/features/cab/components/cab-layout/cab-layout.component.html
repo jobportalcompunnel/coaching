@@ -1,0 +1,22 @@
+<div class="cab-feature-container">
+  <header class="feature-header">
+    <h1>🚕 Cab Management Dashboard</h1>
+    <nav>
+      <ul>
+        <li *ngFor="let link of navLinks">
+          <a [routerLink]="link.path" routerLinkActive="active-link"
+            >{{ link.label }}</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="feature-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="feature-footer">
+    <p>&copy; Cab Feature 2024</p>
+  </footer>
+</div>

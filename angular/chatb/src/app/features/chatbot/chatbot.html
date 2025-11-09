@@ -1,0 +1,59 @@
+<div class="chatbot-container">
+  <h3 class="chatbot-header">Cab Helper Chatbot</h3>
+
+  <!-- Chat Display Area -->
+  <div class="chat-display">
+    <!-- Loop through messages signal to display history -->
+    @for (message of messages(); track $index) {
+      <div 
+        class="message-row"
+        [ngClass]="{
+          'user-row': message.sender === 'user',
+          'gemini-row': message.sender === 'gemini'
+        }"
+      >
+        <div 
+          class="message-bubble"
+          [ngClass]="{
+            'user-bubble': message.sender === 'user',
+            'gemini-bubble': message.sender === 'gemini'
+          }"
+        >
+          {{ message.text }}
+        </div>
+      </div>
+    }
+
+    <!-- Loading Indicator -->
+    @if (isLoading()) {
+      <div class="message-row gemini-row">
+        <div class="message-bubble gemini-bubble loading">
+          <div class="loading-dot"></div>
+          <div class="loading-dot dot-delay-1"></div>
+          <div class="loading-dot dot-delay-2"></div>
+          <span class="ml-2">Thinking...</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Input Area -->
+  <form (ngSubmit)="submitPrompt()" class="input-form">
+    <input 
+      type="text" 
+      [(ngModel)]="userPrompt" 
+      name="userPrompt" 
+      placeholder="Ask about costs or status..." 
+      class="input-field"
+      aria-label="User prompt input"
+      [disabled]="isLoading()"
+    />
+    <button 
+      type="submit" 
+      class="send-button"
+      [disabled]="isLoading() || !userPrompt()"
+    >
+      Send
+    </button>
+  </form>
+</div>
