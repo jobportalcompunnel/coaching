@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geeta Chatbot</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for a modern look -->
+    <script type="module">
+      import { Search, Send } from 'https://cdn.jsdelivr.net/npm/lucide-static@latest/lucide.esm.js';
+      window.lucide = { Search, Send };
+    </script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            max-width: 600px;
+            width: 95%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .chat-area {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            background-color: #f9fafb;
+        }
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        .user-message {
+            justify-content: flex-end;
+        }
+        .user-bubble {
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 1rem 1rem 0 1rem;
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .ai-bubble {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            border-radius: 1rem 1rem 1rem 0;
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin: 0 0.5rem;
+            flex-shrink: 0;
+        }
+        .ai-avatar { background-color: #10b981; color: white; }
+        .user-avatar { background-color: #6366f1; color: white; }
+        
+        /* Loading indicator styling */
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #6366f1;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: dot-fading 1.2s infinite ease-in-out both;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes dot-fading {
+            0%, 80%, 100% { opacity: 0; transform: scale(0); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-200 bg-white rounded-t-xl">
+            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                <span class="ai-avatar mr-3">AI</span> Geeta Chatbot
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Ask me anything!</p>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-area" class="chat-area">
+            <!-- Initial AI Greeting -->
+            <div class="message">
+                <div class="avatar ai-avatar">AI</div>
+                <div class="ai-bubble">Hello! I'm an AI assistant built using the Gemini API. How can I help you today?</div>
+            </div>
+            <!-- Messages will be appended here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-white border-t border-gray-200">
+            <div id="error-message" class="text-red-500 text-sm mb-2 hidden"></div>
+            <div class="flex items-center space-x-3">
+                <input type="text" id="user-input" placeholder="Type your message..."
+                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                       onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button id="send-button" onclick="sendMessage()"
+                        class="p-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 flex items-center justify-center disabled:opacity-50">
+                    <span id="send-icon"><!-- Lucide Send Icon will be inserted here --></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const API_KEY = "AIzaSyAtGBHrzoXicyrn_uGoPZXLK5Hp-ZEWJ3k"; // Leave as empty string. Canvas provides this at runtime.
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        const chatArea = document.getElementById('chat-area');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const errorMessage = document.getElementById('error-message');
+        const sendIconContainer = document.getElementById('send-icon');
+
+        let chatHistory = [];
+        let isSending = false;
+        const MAX_RETRIES = 3;
+
+        // Initialize Lucide icon
+        if (window.lucide && window.lucide.Send) {
+            sendIconContainer.innerHTML = window.lucide.Send.toSvg({ class: 'w-6 h-6' });
+        }
+
+
+        // --- UI Rendering Functions ---
+
+        /** Creates a chat bubble element */
+        function createMessageElement(text, role, isLoading = false) {
+            const container = document.createElement('div');
+            container.classList.add('message');
+            if (role === 'user') {
+                container.classList.add('user-message');
+            }
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('avatar', role === 'user' ? 'user-avatar' : 'ai-avatar');
+            avatar.textContent = role === 'user' ? 'You' : 'AI';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add(role === 'user' ? 'user-bubble' : 'ai-bubble');
+            
+            if (isLoading) {
+                bubble.innerHTML = '<span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>';
+                bubble.id = 'loading-indicator';
+            } else {
+                // Simple markdown-to-html conversion (for basic formatting)
+                const formattedText = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // italic
+                    .replace(/\n/g, '<br>'); // new lines
+                bubble.innerHTML = formattedText;
+            }
+
+            if (role === 'user') {
+                container.appendChild(bubble);
+                container.appendChild(avatar);
+            } else {
+                container.appendChild(avatar);
+                container.appendChild(bubble);
+            }
+            
+            chatArea.appendChild(container);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            return container;
+        }
+
+        /** Handles sending the user's message */
+        async function sendMessage() {
+            if (isSending) return;
+
+            const prompt = userInput.value.trim();
+            if (!prompt) return;
+
+            isSending = true;
+            sendButton.disabled = true;
+            errorMessage.classList.add('hidden');
+            userInput.value = '';
+
+            // 1. Display user message
+            createMessageElement(prompt, 'user');
+            
+            // Add user message to history
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            // 2. Display loading indicator
+            const loadingElement = createMessageElement('', 'model', true);
+
+            try {
+                const responseText = await fetchGeminiResponse(chatHistory);
+                
+                // 3. Update history with model response
+                chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+
+                // 4. Replace loading indicator with AI response
+                loadingElement.remove();
+                createMessageElement(responseText, 'model');
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                
+                // 5. Display error message
+                loadingElement.remove();
+                createMessageElement("Sorry, I encountered an error. Please try again.", 'model');
+                
+                // Show user-facing error message
+                errorMessage.textContent = "Error: Could not connect to AI. Check console for details.";
+                errorMessage.classList.remove('hidden');
+                
+                // Rollback history if the model response failed (optional)
+                chatHistory.pop(); 
+            } finally {
+                isSending = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        /** * Calls the Gemini API with exponential backoff for resilience.
+         * @param {Array} history - The current chat history.
+         */
+        async function fetchGeminiResponse(history) {
+            const systemPrompt = "You are a helpful, creative, and friendly AI assistant. Respond conversationally and concisely. Maintain context throughout the conversation.";
+            
+            const payload = {
+                contents: history,
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    temperature: 0.7
+                }
+            };
+
+            for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(`API returned status ${response.status}: ${JSON.stringify(errorBody)}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        return text;
+                    } else {
+                         throw new Error("Received an unexpected response structure from the API.");
+                    }
+
+                } catch (error) {
+                    if (attempt < MAX_RETRIES - 1) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        // console.log(`Retry attempt ${attempt + 1} after ${delay}ms...`);
+                    } else {
+                        throw error; // Throw the error if all retries fail
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

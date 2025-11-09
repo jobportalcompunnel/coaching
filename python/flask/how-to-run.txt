@@ -1,0 +1,16 @@
+cd D:\pradeep-poc\python\flask
+python -m venv venv
+source venv/bin/activate
+pip install Flask
+Create a file named app.py
+python app.py
+
+Get all	GET	http://127.0.0.1:5000/books	(None)	Retrieves the full list.
+Get one	GET	http://127.0.0.1:5000/books/1	(None)	Retrieves the book with ID 1.
+Create	POST	http://127.0.0.1:5000/books	{"title": "New Book", "author": "J. Doe"}	Adds a new book.
+Update	PUT	http://127.0.0.1:5000/books/2	{"title": "1984 (Revised)"}	Updates the book with ID 2.
+Delete	DELETE	http://127.0.0.1:5000/books/1	(None)	Deletes the book with ID
+
+HTML PAGE
+cd D:\pradeep-poc\python\flask\templates
+http://127.0.0.1:5000/test
